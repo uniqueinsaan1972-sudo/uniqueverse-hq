@@ -1,0 +1,7 @@
+# Copy to .dev.vars for `npm run preview` (Cloudflare local preview). Never commit .dev.vars.
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_SECRET_KEY=paste-your-secret-key-here
+ADMIN_EMAIL=uniqueinsaan1972@gmail.com
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=paste-your-publishable-key-here
+NEXT_PUBLIC_SITE_URL=https://your-site-url
