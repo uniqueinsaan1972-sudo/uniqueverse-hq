@@ -1,16 +1,15 @@
 "use client";
 import { useState } from "react";
-import { categories } from "@/data/categories";
-import { useTemplates } from "@/lib/config-client";
+import { useCategories, useTemplates } from "@/lib/config-client";
 import TemplateCard from "./TemplateCard";
 import Reveal from "./Reveal";
 import { container } from "@/lib/ui";
 
-const pills = [{ id: "all", label: "All" }, ...categories];
 
 export default function TemplateGrid() {
   const [active, setActive] = useState<string>("all");
   const templates = useTemplates();
+  const pills = [{ id: "all", label: "All" }, ...useCategories()];
   const list = active === "all" ? templates : templates.filter((t) => t.category === active);
 
   return (

@@ -13,7 +13,7 @@ import { DATA_URL } from "@/lib/validate";
  */
 type Row = {
   id: string; template_id: string; slug: string; status: string;
-  data: TemplateContent; qr: QrSettings; edit_token: string; previous_slugs: string[] | null;
+  data: TemplateContent; qr: QrSettings; edit_token: string; previous_slugs: string[] | null; owner_id: string | null;
   created_at: string; updated_at: string;
 };
 
@@ -63,14 +63,14 @@ async function pickSlug(base: string) {
   return slug;
 }
 
-export async function createWebsite(templateId: string, content: TemplateContent, name: string, caption: string) {
+export async function createWebsite(templateId: string, content: TemplateContent, name: string, caption: string, ownerId?: string) {
   const id = randomBytes(8).toString("hex");
   const editToken = randomBytes(24).toString("hex");
   const data = await saveImages(id, content);
   for (let attempt = 0; attempt < 5; attempt++) {
     const slug = await pickSlug(name);
     const { data: row, error } = await db().from("websites")
-      .insert({ id, template_id: templateId, slug, status: "published", data, qr: { ...defaultQr, caption }, edit_token: editToken, previous_slugs: [] })
+      .insert({ id, template_id: templateId, slug, status: "published", data, qr: { ...defaultQr, caption }, edit_token: editToken, previous_slugs: [], owner_id: ownerId ?? null })
       .select("*").single();
     if (!error) return { website: toSite(row as Row), token: editToken };
     if (error.code !== "23505") throw error; // 23505 = someone took the slug a moment ago: pick again
@@ -78,14 +78,19 @@ export async function createWebsite(templateId: string, content: TemplateContent
   throw new Error("Could not find a free URL");
 }
 
+/** Who is asking: the secret edit key from this browser, and/or the signed-in account that owns the website. */
+export type Who = { token?: string; userId?: string };
+const allowed = (row: Row, who: Who) =>
+  Boolean((who.token && tokenOk(row.edit_token, who.token)) || (who.userId && row.owner_id === who.userId));
+
 type Editable = { slug: string; data: TemplateContent; qr: QrSettings; previousSlugs: string[] };
 
-async function mutate(id: string, token: string, fn: (s: Editable) => Promise<string | void> | string | void) {
+async function mutate(id: string, who: Who, fn: (s: Editable) => Promise<string | void> | string | void) {
   const { data, error } = await db().from("websites").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   const row = data as Row | null;
   if (!row) return { error: "not_found" as const };
-  if (!tokenOk(row.edit_token, token)) return { error: "forbidden" as const };
+  if (!allowed(row, who)) return { error: "forbidden" as const };
   const s: Editable = { slug: row.slug, data: row.data, qr: row.qr, previousSlugs: row.previous_slugs ?? [] };
   const problem = await fn(s);
   if (problem) return { error: "invalid" as const, message: problem };
@@ -99,11 +104,11 @@ async function mutate(id: string, token: string, fn: (s: Editable) => Promise<st
   return { website: toSite(saved as Row) };
 }
 
-export const updateContent = (id: string, token: string, content: TemplateContent) =>
-  mutate(id, token, async (s) => { s.data = await saveImages(id, content); });
+export const updateContent = (id: string, who: Who, content: TemplateContent) =>
+  mutate(id, who, async (s) => { s.data = await saveImages(id, content); });
 
-export const updateMeta = (id: string, token: string, meta: { slug?: string; qr?: QrSettings }) =>
-  mutate(id, token, async (s) => {
+export const updateMeta = (id: string, who: Who, meta: { slug?: string; qr?: QrSettings }) =>
+  mutate(id, who, async (s) => {
     if (meta.slug && meta.slug !== s.slug) {
       if (RESERVED.has(meta.slug)) return "That URL is already taken.";
       const { data } = await db().from("websites").select("id").eq("slug", meta.slug).maybeSingle();
@@ -114,12 +119,12 @@ export const updateMeta = (id: string, token: string, meta: { slug?: string; qr?
     if (meta.qr) s.qr = meta.qr;
   });
 
-export async function getOwned(id: string, token: string) {
+export async function getOwned(id: string, who: Who) {
   const { data, error } = await db().from("websites").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   const row = data as Row | null;
   if (!row) return { error: "not_found" as const };
-  return tokenOk(row.edit_token, token) ? { website: toSite(row) } : { error: "forbidden" as const };
+  return allowed(row, who) ? { website: toSite(row) } : { error: "forbidden" as const };
 }
 
 export async function getPublicBySlug(slug: string) {

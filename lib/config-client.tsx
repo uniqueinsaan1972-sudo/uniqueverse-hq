@@ -1,20 +1,24 @@
 "use client";
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { templates as baseTemplates } from "@/data/templates";
+import { marketplaceCategories } from "@/data/categories";
 import type { Template } from "@/types/template";
-import type { HomeKey, PublicConfig } from "@/lib/site-config";
+import { PRICING_DEFAULTS, type CategoryRow, type HomeKey, type PublicConfig } from "@/lib/site-config";
 
-const EMPTY: PublicConfig = { home: {}, templates: {} };
-const KEY = "uv:config";
+const EMPTY: PublicConfig = { home: {}, templates: {}, categories: [], pricing: PRICING_DEFAULTS };
+const KEY = "uv:config2";
 let current: PublicConfig = EMPTY;
 let restored = false;
 const subs = new Set<() => void>();
 
+const normalize = (c: Partial<PublicConfig>): PublicConfig => ({
+  home: c.home ?? {}, templates: c.templates ?? {}, categories: c.categories ?? [], pricing: { ...PRICING_DEFAULTS, ...(c.pricing ?? {}) },
+});
 const subscribe = (cb: () => void) => { subs.add(cb); return () => { subs.delete(cb); }; };
 function snapshot() {
   if (!restored && typeof window !== "undefined") {
     restored = true;
-    try { const raw = localStorage.getItem(KEY); if (raw) current = JSON.parse(raw); } catch { /* ignore */ }
+    try { const raw = localStorage.getItem(KEY); if (raw) current = normalize(JSON.parse(raw)); } catch { /* ignore */ }
   }
   return current;
 }
@@ -23,12 +27,12 @@ function setConfig(c: PublicConfig) {
   try { localStorage.setItem(KEY, JSON.stringify(c)); } catch { /* ignore */ }
   subs.forEach((f) => f());
 }
-const useConfig = () => useSyncExternalStore(subscribe, snapshot, () => EMPTY);
+export const useConfig = () => useSyncExternalStore(subscribe, snapshot, () => EMPTY);
 
 /** Loads admin edits once per visit. Until it answers, the built-in text and templates are shown. */
 export function ConfigLoader() {
   useEffect(() => {
-    fetch("/api/config").then((r) => (r.ok ? r.json() : null)).then((c) => { if (c) setConfig(c as PublicConfig); }).catch(() => undefined);
+    fetch("/api/config").then((r) => (r.ok ? r.json() : null)).then((c) => { if (c) setConfig(normalize(c as Partial<PublicConfig>)); }).catch(() => undefined);
   }, []);
   return null;
 }
@@ -37,6 +41,28 @@ export function ConfigLoader() {
 export function T({ k, children }: { k: HomeKey; children: string }) {
   const c = useConfig();
   return <>{c.home[k] || children}</>;
+}
+
+/** Visible categories in the admin's order. Falls back to the built-in list until the admin edits them. */
+export function useCategories(): { id: string; label: string }[] {
+  const c = useConfig();
+  return useMemo(() => {
+    const rows: CategoryRow[] = c.categories;
+    if (!rows.length) return marketplaceCategories;
+    return rows.filter((r) => !r.hidden).sort((a, b) => a.sort - b.sort).map((r) => ({ id: r.id, label: r.label }));
+  }, [c]);
+}
+
+export function useCategoryLabel() {
+  const c = useConfig();
+  const cats = useCategories();
+  return (id: string) => c.categories.find((r) => r.id === id)?.label ?? cats.find((x) => x.id === id)?.label ?? marketplaceCategories.find((x) => x.id === id)?.label ?? id;
+}
+
+/** Tokens needed for a template (0 = free). */
+export function usePrice(templateId: string) {
+  const c = useConfig();
+  return c.templates[templateId]?.price ?? c.pricing.defaultPrice;
 }
 
 /** Built-in templates with admin edits applied, minus hidden and deleted ones. */

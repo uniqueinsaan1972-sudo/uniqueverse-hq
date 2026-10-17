@@ -6,7 +6,8 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
   const next = url.searchParams.get("next") ?? "/admin";
-  const safe = next.startsWith("/admin") && !next.startsWith("//") ? next : "/admin";
+  const allowedAreas = ["/admin", "/account", "/reset", "/topup", "/customize", "/templates"];
+  const safe = next.startsWith("/") && !next.startsWith("//") && allowedAreas.some((p) => next === p || next.startsWith(`${p}/`) || next.startsWith(`${p}?`)) ? next : "/account";
   if (code) {
     try {
       const sb = await authClient();
@@ -14,5 +15,5 @@ export async function GET(req: Request) {
       if (!error) return NextResponse.redirect(new URL(safe, url.origin));
     } catch { /* fall through */ }
   }
-  return NextResponse.redirect(new URL("/admin/login?error=link", url.origin));
+  return NextResponse.redirect(new URL("/login?error=link", url.origin));
 }

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import type { Template } from "@/types/template";
-import { categoryLabel } from "@/lib/templates";
+import { useCategoryLabel, usePrice } from "@/lib/config-client";
 import TemplatePreview from "./TemplatePreview";
 
 /** Card used on /templates and the preview page.
@@ -12,6 +12,8 @@ import TemplatePreview from "./TemplatePreview";
 export default function MarketplaceCard({ template, index = 0 }: { template: Template; index?: number }) {
   const previewHref = `/templates/${template.id}`;
   const customizeHref = `/customize/${template.id}`;
+  const categoryLabel = useCategoryLabel();
+  const price = usePrice(template.id);
   return (
     <motion.article
       initial={{ opacity: 0, y: 16 }}
@@ -43,6 +45,7 @@ export default function MarketplaceCard({ template, index = 0 }: { template: Tem
           </span>
         </div>
         <p className="mt-1.5 text-sm leading-relaxed text-[#6B6B6B]">{template.description}</p>
+        {template.previewUrl && <p className="mt-2 text-xs font-semibold text-[#111111]">{price > 0 ? `${price} tokens` : "Free"}</p>}
         <div className="mt-4 flex gap-2 [@media(hover:hover)_and_(min-width:768px)]:hidden">
           <Link href={previewHref} className="inline-flex h-11 flex-1 items-center justify-center rounded-full border border-[#D9D9DE] bg-white text-sm font-semibold transition active:scale-[0.98]">
             Preview

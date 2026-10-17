@@ -19,24 +19,14 @@ async function call<T>(res: Response): Promise<T> {
   return body as T;
 }
 
-/** Creates the website, or updates the one this device already published for this template. */
-export async function publishWebsite(templateId: string, content: TemplateContent): Promise<{ website: GeneratedWebsite; updated: boolean }> {
-  let existing: { id: string; token: string } | null = null;
-  try { existing = JSON.parse(localStorage.getItem(siteKey(templateId)) ?? "null"); } catch { existing = null; }
+/** Creates a new website (editId empty) or saves changes to an existing one (editId given). */
+export async function publishWebsite(templateId: string, content: TemplateContent, editId?: string): Promise<{ website: GeneratedWebsite; updated: boolean }> {
   const send = (extra: object) =>
     fetch("/api/websites", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ templateId, content, ...extra }) })
       .then((r) => call<{ website: GeneratedWebsite; token?: string }>(r));
-  try {
-    if (existing) return { ...(await send({ websiteId: existing.id, token: existing.token })), updated: true };
-  } catch (e) {
-    if (!(e instanceof ApiError) || (e.status !== 404 && e.status !== 403)) throw e;
-    localStorage.removeItem(siteKey(templateId)); // the old site is gone: publish a fresh one
-  }
+  if (editId) return { ...(await send({ websiteId: editId, token: getToken(editId) })), updated: true };
   const r = await send({});
-  try {
-    localStorage.setItem(siteKey(templateId), JSON.stringify({ id: r.website.id, token: r.token }));
-    localStorage.setItem(tokenKey(r.website.id), r.token ?? "");
-  } catch { /* private mode: dashboard won't be reachable later */ }
+  try { localStorage.setItem(tokenKey(r.website.id), r.token ?? ""); } catch { /* private mode: the account still owns it */ }
   return { website: r.website, updated: false };
 }
 

@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./Logo";
+import { browserAuth } from "@/lib/supabase-browser";
 import { container } from "@/lib/ui";
 
 const links = [
@@ -18,6 +19,14 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try { browserAuth().auth.getSession().then(({ data }) => setSignedIn(Boolean(data.session))).catch(() => setSignedIn(false)); } catch { setSignedIn(false); }
+    }, 0);
+    return () => clearTimeout(t);
+  }, [pathname]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -51,6 +60,9 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <Link href={signedIn ? "/account" : "/login"} className="px-3 text-sm font-medium text-[#6B6B6B] transition hover:text-[#111111]">
+            {signedIn ? "My account" : "Sign in"}
+          </Link>
           <Link href="/templates" className="inline-flex h-10 items-center rounded-full bg-[#111111] px-5 text-sm font-semibold text-white transition hover:bg-[#2a2a2a]">
             Create Yours
           </Link>
@@ -82,6 +94,9 @@ export default function Navbar() {
                   {l.label}
                 </Link>
               ))}
+              <Link href={signedIn ? "/account" : "/login"} onClick={() => setOpen(false)} className="py-3.5 text-base font-medium">
+                {signedIn ? "My account" : "Sign in"}
+              </Link>
               <Link href="/templates" onClick={() => setOpen(false)} className="mt-3 inline-flex h-12 items-center justify-center rounded-full bg-[#111111] text-[15px] font-semibold text-white">
                 Create Yours
               </Link>

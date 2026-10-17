@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function Cookies() {
   return (
     <LegalPage title="Cookie Policy" updated={LAST_UPDATED}>
-      <p>UniqueVerse does not set advertising or tracking cookies. The only cookie is a sign-in cookie used by the site owner in the private admin area.</p>
+      <p>UniqueVerse does not set advertising or tracking cookies. The only cookies are sign-in cookies, set when you sign in to your account (or when the site owner signs in to the admin area), so that the site knows who you are.</p>
       <h2>What is stored in your browser</h2>
       <ul>
         <li><strong>Drafts:</strong> your unfinished answers for a template, so you do not lose them.</li>

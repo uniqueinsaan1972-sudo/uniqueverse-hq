@@ -2,11 +2,11 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import type { Template } from "@/types/template";
-import { categories } from "@/data/categories";
+import { useCategoryLabel } from "@/lib/config-client";
 import TemplatePreview from "./TemplatePreview";
 
 export default function TemplateCard({ template, index }: { template: Template; index: number }) {
-  const label = categories.find((c) => c.id === template.category)?.label ?? template.category;
+  const label = useCategoryLabel()(template.category);
   return (
     <motion.article
       initial={{ opacity: 0, y: 16 }}

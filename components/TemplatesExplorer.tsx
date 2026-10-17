@@ -2,21 +2,21 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, X, Sparkles } from "lucide-react";
-import { marketplaceCategories } from "@/data/categories";
-import { useTemplates } from "@/lib/config-client";
-import { filterTemplates, categoryLabel } from "@/lib/templates";
+import { useCategories, useCategoryLabel, useTemplates } from "@/lib/config-client";
+import { filterTemplates } from "@/lib/templates";
 import MarketplaceCard from "./MarketplaceCard";
 import TemplatePreview from "./TemplatePreview";
 import Reveal from "./Reveal";
 import { container, btnPrimary, btnSecondary } from "@/lib/ui";
 
-const pills = [{ id: "all", label: "All" }, ...marketplaceCategories];
 
 export default function TemplatesExplorer() {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string>("all");
   const templates = useTemplates();
-  const results = useMemo(() => filterTemplates(templates, query, active), [templates, query, active]);
+  const categoryLabel = useCategoryLabel();
+  const pills = [{ id: "all", label: "All" }, ...useCategories()];
+  const results = useMemo(() => filterTemplates(templates, query, active, categoryLabel), [templates, query, active, categoryLabel]);
   const featured = templates.find((t) => t.featured) ?? templates[0];
   const isBrowsing = active === "all" && query.trim() === "";
   const reset = () => {

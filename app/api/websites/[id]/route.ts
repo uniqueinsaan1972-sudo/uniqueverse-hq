@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { checkSlug } from "@/lib/slug";
 import { validateQr } from "@/lib/validate";
 import { getOwned, updateMeta } from "@/lib/store";
+import { getUser } from "@/lib/auth";
 
 type Ctx = { params: Promise<{ id: string }> };
 const fail = (status: number, error: string) => NextResponse.json({ error }, { status });
@@ -10,7 +11,8 @@ const valid = (id: string) => /^[a-f0-9]{16}$/.test(id);
 export async function GET(req: Request, { params }: Ctx) {
   const { id } = await params;
   if (!valid(id)) return fail(404, "Website not found.");
-  const r = await getOwned(id, req.headers.get("x-edit-token") ?? "");
+  const user = await getUser();
+  const r = await getOwned(id, { token: req.headers.get("x-edit-token") ?? "", userId: user?.id });
   if ("error" in r) return fail(r.error === "forbidden" ? 403 : 404, r.error === "forbidden" ? "This dashboard is only available on the device that created the website." : "Website not found.");
   return NextResponse.json({ website: r.website });
 }
@@ -33,7 +35,8 @@ export async function PATCH(req: Request, { params }: Ctx) {
     meta.qr = q.value;
   }
   try {
-    const r = await updateMeta(id, req.headers.get("x-edit-token") ?? "", meta);
+    const user = await getUser();
+    const r = await updateMeta(id, { token: req.headers.get("x-edit-token") ?? "", userId: user?.id }, meta);
     if ("error" in r) return fail(r.error === "forbidden" ? 403 : r.error === "invalid" ? 409 : 404, r.error === "invalid" ? r.message ?? "Invalid change." : "We couldn't update this website.");
     return NextResponse.json({ website: r.website });
   } catch {

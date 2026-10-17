@@ -28,9 +28,30 @@ export interface TemplateOverride {
   category?: string;
   hidden?: boolean;
   deleted?: boolean;
+  /** Tokens needed to generate a website with this template. 0 = free. */
+  price?: number;
+}
+
+export interface CategoryRow {
+  id: string;
+  label: string;
+  sort: number;
+  hidden: boolean;
+}
+
+export const PRICING_DEFAULTS = { defaultPrice: 99, minTopup: 99, maxTopup: 9999 };
+export type PublicPricing = typeof PRICING_DEFAULTS;
+
+export interface PaymentMethod {
+  label: string;
+  title: string;
+  number: string;
+  note: string;
 }
 
 export interface PublicConfig {
   home: Partial<Record<HomeKey, string>>;
   templates: Record<string, TemplateOverride>;
+  categories: CategoryRow[];
+  pricing: PublicPricing;
 }

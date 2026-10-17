@@ -8,6 +8,25 @@ type Overview = {
   usage: { storage_bytes: number; storage_files: number; db_bytes: number } | null;
 };
 
+type Health = { ok: boolean; items: { name: string; ok: boolean; detail?: string }[] };
+
+function SetupCheck() {
+  const { data, error } = useApi<Health>("/api/admin/health");
+  if (error) return <ErrorBox message={error} />;
+  if (!data) return null;
+  if (data.ok) return <p className="text-sm text-emerald-700">Setup check: everything the database needs is in place.</p>;
+  return (
+    <Card title="Setup check: something is missing">
+      <p className="mb-3 text-sm text-[#3a3a3f]">Fix the red items. For missing tables, columns or functions, open Supabase &gt; SQL Editor, run <b>supabase/all-in-one.sql</b>, then reload this page.</p>
+      <ul className="space-y-2 text-sm">
+        {data.items.filter((i) => !i.ok).map((i) => (
+          <li key={i.name} className="rounded-lg bg-red-50 px-3 py-2 text-red-700"><b>{i.name}</b>{i.detail && <span className="block break-words text-xs">{i.detail}</span>}</li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
 export default function OverviewPage() {
   const { data, error, loading } = useApi<Overview>("/api/admin/overview");
   return (
@@ -15,6 +34,7 @@ export default function OverviewPage() {
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Overview</h1>
       <p className="mt-1 text-sm text-[#6B6B6B]">Real numbers from your database.</p>
       <div className="mt-6 space-y-5">
+        <SetupCheck />
         {error && <ErrorBox message={error} />}
         {loading && !data && <Skeleton />}
         {data && (

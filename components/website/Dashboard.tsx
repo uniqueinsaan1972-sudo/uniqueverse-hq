@@ -97,7 +97,7 @@ export default function Dashboard({ id, done }: { id: string; done?: string }) {
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
             <a href={publicPath(site.slug)} target="_blank" rel="noopener noreferrer" className={btnPrimary}><ExternalLink size={16} /> Open Website</a>
             <button type="button" onClick={copy} className={btnSecondary}><Copy size={16} /> Copy Link</button>
-            <Link href={`/customize/${site.templateId}`} className={btnSecondary}><Pencil size={16} /> Edit Website</Link>
+            <Link href={`/customize/${site.templateId}?edit=${site.id}`} className={btnSecondary}><Pencil size={16} /> Edit Website</Link>
             <Link href={`/website/${site.id}/qr`} className={btnSecondary}><QrCode size={16} /> Customize QR</Link>
           </div>
         </section>

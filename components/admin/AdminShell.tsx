@@ -2,14 +2,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Globe, Home, LayoutTemplate, LogOut, Menu, Settings, X, LayoutDashboard } from "lucide-react";
+import { BarChart3, Coins, Globe, Home, LayoutTemplate, LogOut, Menu, Settings, Tags, Ticket, Users, Wallet, X, LayoutDashboard } from "lucide-react";
 import Logo from "@/components/Logo";
 import { browserAuth } from "@/lib/supabase-browser";
 
 const nav = [
   { href: "/admin", label: "Overview", Icon: LayoutDashboard },
   { href: "/admin/websites", label: "Websites", Icon: Globe },
+  { href: "/admin/payments", label: "Payments", Icon: Wallet },
+  { href: "/admin/users", label: "Users", Icon: Users },
   { href: "/admin/templates", label: "Templates", Icon: LayoutTemplate },
+  { href: "/admin/categories", label: "Categories", Icon: Tags },
+  { href: "/admin/pricing", label: "Pricing", Icon: Coins },
+  { href: "/admin/coupons", label: "Coupons", Icon: Ticket },
   { href: "/admin/homepage", label: "Home page", Icon: Home },
   { href: "/admin/analytics", label: "Analytics", Icon: BarChart3 },
   { href: "/admin/settings", label: "Settings", Icon: Settings },

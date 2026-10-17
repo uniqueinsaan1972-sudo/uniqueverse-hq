@@ -27,7 +27,16 @@ function Form() {
     setBusy(true); setMsg("");
     const sb = browserAuth();
     const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password });
-    if (error) { setBusy(false); return setMsg("Wrong email or password."); }
+    if (error) {
+      setBusy(false);
+      const m = error.message.toLowerCase();
+      return setMsg(
+        m.includes("invalid login") ? "Wrong email or password. Check that this admin user exists in Supabase (Authentication > Users)."
+        : m.includes("not confirmed") ? "This email is not confirmed yet. In Supabase, open the user and confirm it."
+        : m.includes("api key") || m.includes("fetch") ? "Sign-in is not set up correctly (check the Supabase URL and publishable key)."
+        : `Could not sign in: ${error.message}`,
+      );
+    }
     const { data: aal } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
     router.replace(aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2" ? "/admin/verify" : "/admin");
     router.refresh();

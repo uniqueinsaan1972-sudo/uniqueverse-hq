@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import type { Template } from "@/types/template";
 import type { ContentConfig, ImageValue, NamesValue, TemplateContent } from "@/types/content";
@@ -10,7 +10,8 @@ import TemplatePreview from "@/components/TemplatePreview";
 import TemplateFrame from "@/components/TemplateFrame";
 import { AddImageButton, ImageCard, Section, TextArea, TextInput, Toggle } from "./Controls";
 import { container } from "@/lib/ui";
-import { publishWebsite, siteKey } from "@/lib/client";
+import { ApiError, fetchOwned, publishWebsite } from "@/lib/client";
+import { usePrice } from "@/lib/config-client";
 import GenerateDialog from "./GenerateDialog";
 
 export default function CustomizeEditor({ template, config }: { template: Template; config: ContentConfig }) {
@@ -18,24 +19,37 @@ export default function CustomizeEditor({ template, config }: { template: Templa
   const [content, setContent] = useState<TemplateContent>(() => cloneContent(config.defaults));
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
-  const [hasSite, setHasSite] = useState(false);
-  const [gen, setGen] = useState({ open: false, step: 0, error: "" });
+  const [gen, setGen] = useState<{ open: boolean; step: number; error: string; action: { label: string; href: string } | null }>({ open: false, step: 0, error: "", action: null });
+  const [acct, setAcct] = useState<{ loggedIn: boolean; balance: number } | null>(null);
   const router = useRouter();
-  const storageKey = `uv:draft:${template.id}`;
+  const editParam = useSearchParams().get("edit") ?? "";
+  const editId = /^[a-f0-9]{16}$/.test(editParam) ? editParam : "";
+  const price = usePrice(template.id);
+  const storageKey = `uv:draft:${template.id}:${editId || "new"}`;
+  const loginHref = `/login?next=${encodeURIComponent(`/customize/${template.id}${editId ? `?edit=${editId}` : ""}`)}`;
   const gal = config.gallery ?? { min: 0, max: 12 };
 
   // restore this device's draft (the original template defaults are never modified)
   useEffect(() => {
+    let off = false;
     const t = setTimeout(() => {
+      if (editId) {
+        // editing: start from what is saved on the server
+        fetchOwned(editId).then((r) => { if (!off) setContent(r.website.data); }).catch(() => { if (!off) setError("We could not load that website. Please open it again from your account."); }).finally(() => { if (!off) setReady(true); });
+        return;
+      }
       try {
         const raw = localStorage.getItem(storageKey);
         if (raw) setContent(JSON.parse(raw));
       } catch { /* ignore broken drafts */ }
-      try { setHasSite(Boolean(localStorage.getItem(siteKey(template.id)))); } catch { /* ignore */ }
       setReady(true);
     }, 0);
-    return () => clearTimeout(t);
-  }, [storageKey, template.id]);
+    return () => { off = true; clearTimeout(t); };
+  }, [storageKey, editId]);
+
+  useEffect(() => {
+    fetch("/api/account/balance", { cache: "no-store" }).then((r) => r.json()).then(setAcct).catch(() => setAcct(null));
+  }, []);
 
   useEffect(() => {
     if (!ready) return;
@@ -72,16 +86,23 @@ export default function CustomizeEditor({ template, config }: { template: Templa
     if (fields.names && !content.names.main.trim()) return setError("Please enter a main name before generating.");
     if (fields.wish && !content.wish.trim()) return setError("Please write a message before generating.");
     setError("");
-    setGen({ open: true, step: 0, error: "" });
+    if (!editId && acct && !acct.loggedIn) { router.push(loginHref); return; }
+    setGen({ open: true, step: 0, error: "", action: null });
     const tick = setInterval(() => setGen((g) => (g.step < 4 ? { ...g, step: g.step + 1 } : g)), 600);
     try {
-      const [res] = await Promise.all([publishWebsite(template.id, content), new Promise((r) => setTimeout(r, 2600))]);
+      const [res] = await Promise.all([publishWebsite(template.id, content, editId || undefined), new Promise((r) => setTimeout(r, 2600))]);
       clearInterval(tick);
-      setGen({ open: true, step: 5, error: "" });
+      setGen({ open: true, step: 5, error: "", action: null });
+      try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
       setTimeout(() => router.push(`/website/${res.website.id}?done=${res.updated ? "updated" : "new"}`), 700);
     } catch (e) {
       clearInterval(tick);
-      setGen({ open: true, step: 0, error: e instanceof Error ? e.message : "Your website could not be generated. Your customization is safe. Try again." });
+      const code = e instanceof ApiError ? e.code : undefined;
+      setGen({
+        open: true, step: 0,
+        error: e instanceof Error ? e.message : "Your website could not be generated. Your customization is safe. Try again.",
+        action: code === "tokens" ? { label: "Top up tokens", href: "/topup" } : code === "login" ? { label: "Sign in", href: loginHref } : null,
+      });
     }
   };
 
@@ -162,10 +183,18 @@ export default function CustomizeEditor({ template, config }: { template: Templa
               <RotateCcw size={16} /> Reset to Template Defaults
             </button>
             <button type="button" onClick={generate} disabled={!template.previewUrl || gen.open} title={template.previewUrl ? undefined : "Demo templates can't be published"} className="inline-flex h-12 items-center justify-center rounded-full bg-[#111111] px-7 text-[15px] font-semibold text-white transition hover:bg-[#2a2a2a] disabled:pointer-events-none disabled:opacity-40">
-              {hasSite ? "Update website" : "Generate website"}
+              {editId ? "Save changes" : price > 0 ? `Generate website (${price} tokens)` : "Generate website (free)"}
             </button>
           </div>
-          <p className="text-xs text-[#6B6B6B]">Your changes are kept as a draft on this device.</p>
+          {!editId && template.previewUrl && (
+            <p className="text-sm text-[#3a3a3f]">
+              {price > 0 ? <>This website costs <strong>{price} tokens</strong>. </> : <>This template is <strong>free</strong>. </>}
+              {acct?.loggedIn
+                ? <>You have <strong>{acct.balance}</strong> tokens.{price > 0 && acct.balance < price && <> <Link href="/topup" className="font-semibold underline">Top up tokens</Link></>}</>
+                : acct && <><Link href={loginHref} className="font-semibold underline">Sign in or create a free account</Link> to generate.</>}
+            </p>
+          )}
+          <p className="text-xs text-[#6B6B6B]">{editId ? "You are editing a website you already made. Saving it is free." : "Your changes are kept as a draft on this device."}</p>
         </div>
 
         <div className="order-1 lg:sticky lg:top-24 lg:order-2">
@@ -184,7 +213,7 @@ export default function CustomizeEditor({ template, config }: { template: Templa
           </div>
         </div>
       </div>
-      <GenerateDialog open={gen.open} step={gen.step} error={gen.error} onRetry={generate} onClose={() => setGen({ open: false, step: 0, error: "" })} />
+      <GenerateDialog open={gen.open} step={gen.step} error={gen.error} onRetry={generate} action={gen.action} onClose={() => setGen({ open: false, step: 0, error: "", action: null })} />
     </main>
   );
 }

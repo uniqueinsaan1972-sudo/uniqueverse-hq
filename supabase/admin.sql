@@ -92,3 +92,6 @@ returns jsonb language sql stable security definer set search_path = public as $
 $$;
 revoke all on function public.usage_summary() from public, anon, authenticated;
 grant execute on function public.usage_summary() to service_role;
+
+-- Make the API see the new tables right away.
+notify pgrst, 'reload schema';

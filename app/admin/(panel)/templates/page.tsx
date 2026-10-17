@@ -1,16 +1,17 @@
 "use client";
 import { useState } from "react";
-import { marketplaceCategories } from "@/data/categories";
 import { Card, ErrorBox, Skeleton, btn, btnLight, input, send, useApi } from "@/components/admin/ui";
 import { Toggle } from "@/components/customize/Controls";
 
 type Row = {
   id: string; defaultName: string; defaultDescription: string; defaultCategory: string;
   name: string; description: string; category: string; hidden: boolean; deleted: boolean; real: boolean;
+  price: number | null; defaultPrice: number;
 };
+type Cat = { id: string; label: string };
 
-function Editor({ row, onSaved }: { row: Row; onSaved: () => void }) {
-  const [f, setF] = useState({ name: row.name, description: row.description, category: row.category, hidden: row.hidden, deleted: row.deleted });
+function Editor({ row, cats, onSaved }: { row: Row; cats: Cat[]; onSaved: () => void }) {
+  const [f, setF] = useState({ name: row.name, description: row.description, category: row.category, hidden: row.hidden, deleted: row.deleted, price: row.price === null ? "" : String(row.price) });
   const [state, setState] = useState("");
   const save = async (patch?: Partial<typeof f>) => {
     const next = { ...f, ...patch };
@@ -30,9 +31,16 @@ function Editor({ row, onSaved }: { row: Row; onSaved: () => void }) {
         <label className="text-sm font-medium">Category
           <select className={`${input} mt-1.5`} value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
             <option value="">Default ({row.defaultCategory})</option>
-            {marketplaceCategories.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+            {cats.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
         </label>
+        <div className="text-sm font-medium">Price (tokens)
+          <div className="mt-1.5 flex gap-2">
+            <input inputMode="numeric" className={input} value={f.price} placeholder={`Default (${row.defaultPrice})`} onChange={(e) => setF({ ...f, price: e.target.value.replace(/\D/g, "") })} />
+            <button type="button" className={btnLight} onClick={() => setF({ ...f, price: "0" })}>Free</button>
+          </div>
+          <p className="mt-1 text-xs font-normal text-[#6B6B6B]">{f.price === "0" ? "Free: users pay nothing." : f.price === "" ? "Uses the default price." : `${f.price} tokens per website.`}</p>
+        </div>
         <label className="text-sm font-medium sm:col-span-2">Description<input className={`${input} mt-1.5`} maxLength={200} value={f.description} placeholder={row.defaultDescription} onChange={(e) => setF({ ...f, description: e.target.value })} /></label>
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
@@ -51,6 +59,7 @@ function Editor({ row, onSaved }: { row: Row; onSaved: () => void }) {
 
 export default function TemplatesAdmin() {
   const { data, error, loading, reload } = useApi<Row[]>("/api/admin/templates");
+  const { data: cats } = useApi<Cat[]>("/api/admin/categories");
   return (
     <div>
       <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Templates</h1>
@@ -58,7 +67,7 @@ export default function TemplatesAdmin() {
       <div className="mt-6 space-y-4">
         {error && <ErrorBox message={error} />}
         {loading && !data && <Skeleton />}
-        {data?.map((r) => <Editor key={r.id} row={r} onSaved={reload} />)}
+        {data && cats && data.map((r) => <Editor key={r.id} row={r} cats={cats} onSaved={reload} />)}
       </div>
     </div>
   );

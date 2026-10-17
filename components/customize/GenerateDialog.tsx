@@ -1,11 +1,12 @@
 "use client";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Loader2, TriangleAlert } from "lucide-react";
 import { btnPrimary, btnSecondary } from "@/lib/ui";
 
 const STEPS = ["Preparing content", "Applying customization", "Processing images", "Creating your personal page", "Generating QR code"];
 
-export default function GenerateDialog({ open, step, error, onRetry, onClose }: { open: boolean; step: number; error: string; onRetry: () => void; onClose: () => void }) {
+export default function GenerateDialog({ open, step, error, action, onRetry, onClose }: { open: boolean; step: number; error: string; action?: { label: string; href: string } | null; onRetry: () => void; onClose: () => void }) {
   return (
     <AnimatePresence>
       {open && (
@@ -18,7 +19,7 @@ export default function GenerateDialog({ open, step, error, onRetry, onClose }: 
                 <p className="mt-2 text-sm text-[#6B6B6B]">{error}</p>
                 <div className="mt-6 flex gap-3">
                   <button type="button" onClick={onClose} className={`${btnSecondary} flex-1`}>Back to editor</button>
-                  <button type="button" onClick={onRetry} className={`${btnPrimary} flex-1`}>Try again</button>
+                  {action ? <Link href={action.href} className={`${btnPrimary} flex-1`}>{action.label}</Link> : <button type="button" onClick={onRetry} className={`${btnPrimary} flex-1`}>Try again</button>}
                 </div>
               </div>
             ) : (

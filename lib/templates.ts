@@ -6,11 +6,11 @@ export function categoryLabel(id: string) {
 }
 
 /** Search (name, category, description) and category filter work together. */
-export function filterTemplates(list: Template[], query: string, category: string) {
+export function filterTemplates(list: Template[], query: string, category: string, label: (id: string) => string = categoryLabel) {
   const q = query.trim().toLowerCase();
   return list.filter((t) => {
     if (category !== "all" && t.category !== category) return false;
     if (!q) return true;
-    return [t.name, categoryLabel(t.category), t.description, t.previewTitle].some((s) => s.toLowerCase().includes(q));
+    return [t.name, label(t.category), t.description, t.previewTitle].some((s) => s.toLowerCase().includes(q));
   });
 }

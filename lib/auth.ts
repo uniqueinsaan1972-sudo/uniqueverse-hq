@@ -18,6 +18,17 @@ export async function authClient() {
   });
 }
 
+/** The signed-in site user (not necessarily the admin), or null. */
+export async function getUser() {
+  try {
+    const sb = await authClient();
+    const { data: { user } } = await sb.auth.getUser();
+    return user;
+  } catch {
+    return null;
+  }
+}
+
 export type AdminState = { ok: true; email: string } | { ok: false; reason: "login" | "forbidden" | "mfa" | "config" };
 
 /** The ONLY place that decides who is an admin. Always runs on the server. */

@@ -79,3 +79,20 @@ export async function fileToImage(file: File): Promise<ImageValue> {
     type: src.slice(5, src.indexOf(";")),
   };
 }
+
+/** Shrinks a picture to a JPEG data URL. Used for profile pictures and payment screenshots. */
+export async function fileToJpegDataUrl(file: File, maxSide: number, quality: number): Promise<string> {
+  if (!file.type.startsWith("image/") || file.type === "image/gif") throw new Error("Please choose a picture (JPG, PNG or WebP).");
+  if (file.size > MAX_IMAGE_BYTES) throw new Error("This picture is too large (max 15 MB).");
+  const img = await loadImage(await readDataUrl(file));
+  const scale = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not process this picture.");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", quality);
+}

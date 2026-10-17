@@ -15,6 +15,8 @@ export default function Terms() {
       <p>By using UniqueVerse you agree to these terms. If you do not agree, please do not use the service.</p>
       <h2>The service</h2>
       <p>UniqueVerse lets you create a personal website from a template, share it with a link and make a QR code. We may change, pause or stop features at any time.</p>
+      <h2>Accounts, tokens and payments</h2>
+      <p>You need an account to generate a website. Some templates are free and some cost tokens; the price is shown before you generate. You buy tokens by sending money by one of the payment methods shown on the Top up page and sending us the proof. We check every payment by hand and add the tokens after we confirm it, which can take up to 24 hours. Tokens have no cash value. If a payment was a mistake or something went wrong, write to us and we will look at it case by case.</p>
       <h2>Your content</h2>
       <p>You keep ownership of what you add (text, names, photos). You give us permission to store it and show it to anyone who has your link, so the service can work. You are responsible for your content, and you confirm you have the right to use it, including photos of other people.</p>
       <h2>What is not allowed</h2>

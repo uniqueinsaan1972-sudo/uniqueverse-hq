@@ -10,9 +10,10 @@ export const metadata: Metadata = {
 
 const faqs = [
   ["What is UniqueVerse?", "A place to make a personal website for someone special. Choose a template, add names, a message and photos, then share your link or QR code."],
-  ["Is it free?", "Yes, creating a website is free right now. If that changes, we will say so on this site."],
-  ["Do I need an account?", "No. Your dashboard is tied to the browser you used to create the website, so do not clear your browser data and keep using the same device to edit it."],
-  ["How do I edit my website later?", "Open your dashboard on the same device and choose Edit Website. Your answers are already filled in. Generating again updates the same link."],
+  ["Is it free?", "Browsing and previewing templates is free. Some templates are free to generate and some cost tokens. The price is shown on each template and before you generate."],
+  ["How do tokens work?", "1 rupee is 1 token. Open Top up, choose how many tokens, send the money to one of the payment methods shown, then upload your screenshot. We check it and add the tokens, usually within 24 hours. Coupons can lower the amount you pay."],
+  ["Do I need an account?", "Yes, a free account is needed to generate a website. Your websites, links and QR codes are saved in your account, so you can open them from any device."],
+  ["How do I edit my website later?", "Open your website's dashboard right after making it and choose Edit Website. Your answers are already filled in, and saving changes is free and keeps the same link. In My account you can open the link and customize the QR code."],
   ["Can I change my link?", "Yes. On the dashboard, edit the link name and press Save URL. The old link redirects to the new one, and the QR code updates automatically."],
   ["Who can see my website?", "Anyone with your link. It is not password-protected and it is not listed in search engines, so share the link only with people you want to see it."],
   ["What about photos?", "Photos are optional. Your browser shrinks large photos before upload. You can replace the demo photos with your own, or keep them."],
