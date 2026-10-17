@@ -19,7 +19,8 @@ function Form() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true); setMsg("");
-    const { error } = await browserAuth().auth.signInWithPassword({ email: email.trim(), password });
+    let error;
+    try { ({ error } = await browserAuth().auth.signInWithPassword({ email: email.trim(), password })); } catch (err) { setBusy(false); return setMsg(err instanceof Error ? err.message : "Could not sign in."); }
     if (error) {
       setBusy(false);
       const m = error.message.toLowerCase();

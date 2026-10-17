@@ -25,7 +25,8 @@ function Form() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true); setMsg("");
-    const sb = browserAuth();
+    let sb;
+    try { sb = browserAuth(); } catch (err) { setBusy(false); return setMsg(err instanceof Error ? err.message : "Sign-in is not set up."); }
     const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password });
     if (error) {
       setBusy(false);

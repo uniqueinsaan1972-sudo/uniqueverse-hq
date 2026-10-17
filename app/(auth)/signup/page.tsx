@@ -25,10 +25,14 @@ function Form() {
     if (pw.length < 8) return setMsg("Use at least 8 characters for the password.");
     if (pw !== pw2) return setMsg("The two passwords do not match.");
     setBusy(true);
-    const { data, error } = await browserAuth().auth.signUp({
-      email: email.trim(), password: pw,
-      options: { data: { full_name: name.trim().slice(0, 60) }, emailRedirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
-    });
+    let res;
+    try {
+      res = await browserAuth().auth.signUp({
+        email: email.trim(), password: pw,
+        options: { data: { full_name: name.trim().slice(0, 60) }, emailRedirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+      });
+    } catch (err) { setBusy(false); return setMsg(err instanceof Error ? err.message : "Could not create the account."); }
+    const { data, error } = res;
     setBusy(false);
     if (error) return setMsg(error.message.toLowerCase().includes("already") ? "This email already has an account. Try signing in." : `Could not create the account: ${error.message}`);
     if (data.session) { router.replace(next); router.refresh(); return; }

@@ -7,9 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload"
+    "preview": "npm run check-env && opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "npm run check-env && opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "npm run check-env && opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "check-env": "node scripts/check-env.mjs"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.11",
