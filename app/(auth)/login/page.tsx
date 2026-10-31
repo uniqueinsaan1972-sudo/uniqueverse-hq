@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthCard from "@/components/admin/AuthCard";
 import { btn, input } from "@/components/admin/ui";
+import PasswordInput from "@/components/auth/PasswordInput";
 import { browserAuth } from "@/lib/supabase-browser";
 import { safeNext } from "@/lib/nav";
 
@@ -33,7 +34,7 @@ function Form() {
     <AuthCard title="Sign in" text="Welcome back. Sign in to see your websites and tokens.">
       <form onSubmit={submit} className="space-y-3">
         <input type="email" required autoComplete="username" aria-label="Email" placeholder="Email" className={input} value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input type="password" required autoComplete="current-password" aria-label="Password" placeholder="Password" className={input} value={password} onChange={(e) => setPassword(e.target.value)} />
+        <PasswordInput label="Password" placeholder="Password" autoComplete="current-password" value={password} onChange={setPassword} />
         {msg && <p role="alert" className="text-sm text-red-600">{msg}</p>}
         <button type="submit" disabled={busy} className={`${btn} w-full`}>{busy ? "Signing in..." : "Sign in"}</button>
       </form>

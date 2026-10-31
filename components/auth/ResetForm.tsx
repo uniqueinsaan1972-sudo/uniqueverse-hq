@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AuthCard from "@/components/admin/AuthCard";
-import { btn, input } from "@/components/admin/ui";
+import { btn } from "@/components/admin/ui";
+import PasswordInput from "@/components/auth/PasswordInput";
 import { browserAuth } from "@/lib/supabase-browser";
 
 /** Page you land on after clicking the email link: choose a new password. */
@@ -31,8 +32,8 @@ export default function ResetForm({ forgotHref, after }: { forgotHref: string; a
         <p className="text-sm text-[#3a3a3f]">This link is invalid or expired. <Link href={forgotHref} className="font-semibold underline">Ask for a new one</Link>.</p>
       ) : (
         <form onSubmit={submit} className="space-y-3">
-          <input type="password" autoComplete="new-password" aria-label="New password" placeholder="New password (8+ characters)" className={input} value={pw} onChange={(e) => setPw(e.target.value)} />
-          <input type="password" autoComplete="new-password" aria-label="Repeat new password" placeholder="Repeat new password" className={input} value={pw2} onChange={(e) => setPw2(e.target.value)} />
+          <PasswordInput label="New password" placeholder="New password (8+ characters)" autoComplete="new-password" value={pw} onChange={setPw} />
+          <PasswordInput label="Repeat new password" placeholder="Repeat new password" autoComplete="new-password" value={pw2} onChange={setPw2} />
           {msg && <p role="alert" className="text-sm text-red-600">{msg}</p>}
           <button type="submit" disabled={ok === null} className={`${btn} w-full`}>Save new password</button>
         </form>

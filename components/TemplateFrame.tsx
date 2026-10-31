@@ -5,9 +5,9 @@ import { resolveNames } from "@/lib/content";
 
 /** Shows a real template in an iframe and streams the current content into it. */
 export default function TemplateFrame({
-  src, title, content, nameSlots, className,
+  src, title, content, nameSlots, className, loading,
 }: {
-  src: string; title: string; content: TemplateContent; nameSlots: NameSlot[]; className?: string;
+  src: string; title: string; content: TemplateContent; nameSlots: NameSlot[]; className?: string; loading?: "lazy" | "eager";
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const send = useCallback(() => {
@@ -17,5 +17,5 @@ export default function TemplateFrame({
     );
   }, [content, nameSlots]);
   useEffect(() => { send(); }, [send]);
-  return <iframe ref={ref} src={src} title={title} onLoad={send} className={className} />;
+  return <iframe ref={ref} src={src} title={title} onLoad={send} className={className} loading={loading} />;
 }

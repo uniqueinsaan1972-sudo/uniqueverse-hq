@@ -64,7 +64,7 @@ export default function Navbar() {
             {signedIn ? "My account" : "Sign in"}
           </Link>
           <Link href="/templates" className="inline-flex h-10 items-center rounded-full bg-[#111111] px-5 text-sm font-semibold text-white transition hover:bg-[#2a2a2a]">
-            Create Yours
+            <span className="lg:hidden">Create</span><span className="hidden lg:inline">Create Your Website</span>
           </Link>
         </div>
 
@@ -98,7 +98,7 @@ export default function Navbar() {
                 {signedIn ? "My account" : "Sign in"}
               </Link>
               <Link href="/templates" onClick={() => setOpen(false)} className="mt-3 inline-flex h-12 items-center justify-center rounded-full bg-[#111111] text-[15px] font-semibold text-white">
-                Create Yours
+                Create Your Website
               </Link>
             </div>
           </motion.div>

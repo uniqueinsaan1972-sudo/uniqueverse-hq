@@ -2,6 +2,11 @@
 
 Follow the steps in order. Do not skip step 2 (Supabase).
 
+
+## Updating from an older zip (important)
+- After replacing the files run `npm install` again. `package.json` pins `@opennextjs/cloudflare` to 1.20.11 and `next` to 16.3.8 on purpose: they are the pair that was tested together. A newer adapter asks for a newer Next.js and a fresh install would stop with an ERESOLVE error.
+- Then `npm run deploy`. It first checks your `NEXT_PUBLIC_` keys; if they are missing it stops and tells you.
+
 ## 1. Put the project on your computer
 1. Extract this zip into a NEW folder, for example `C:\projects\uniqueverse-cloudflare`. Do not copy it over your old project.
 2. Open that folder in VS Code, open the terminal, run: `npm install`

@@ -2,8 +2,10 @@ import { templates } from "@/data/templates";
 import type { Template } from "@/types/template";
 import TemplatePreview from "./TemplatePreview";
 import Reveal from "./Reveal";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { T } from "@/lib/config-client";
+import AccountLinks from "./home/AccountLinks";
 import { container, btnPrimary, btnSecondary } from "@/lib/ui";
 
 const byId = (id: string) => templates.find((t) => t.id === id) as Template;
@@ -30,24 +32,25 @@ export default function Hero() {
         </Reveal>
         <Reveal delay={0.1}>
           <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#6B6B6B] sm:text-lg">
-            <T k="heroSubtitle">{"Turn your memories, wishes, photos and feelings into a beautiful personal website made just for someone special."}</T>
+            <T k="heroSubtitle">{"Turn your photos, memories, letters, and wishes into a beautiful personalized website. Customize it, share the link, and make someone\u2019s day unforgettable."}</T>
           </p>
         </Reveal>
         <Reveal delay={0.2}>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a href="#templates" className={btnPrimary}>
-              <T k="heroPrimary">Explore Templates</T> <ArrowRight size={18} />
+            <a href="#start" className={btnPrimary}>
+              <T k="heroPrimary">Create Your Website</T> <ArrowRight size={18} />
             </a>
-            <a href="#how-it-works" className={btnSecondary}><T k="heroSecondary">How It Works</T></a>
+            <Link href="/templates" className={btnSecondary}><T k="heroSecondary">Explore Templates</T></Link>
           </div>
           <p className="mt-6 text-sm text-[#6B6B6B]"><T k="heroTrust">{"Personalized \u2022 Shareable \u2022 Made with memories"}</T></p>
+          <AccountLinks />
         </Reveal>
 
         <div className="relative mx-auto mt-14 h-[340px] max-w-5xl sm:mt-16 sm:h-[460px] lg:h-[540px]">
-          <Floating id="forever-yours" pos="left-0 top-4 w-[36%] -rotate-3 sm:w-[27%]" delay="0s" />
-          <Floating id="midnight-letter" pos="right-0 top-0 w-[34%] rotate-3 sm:w-[27%]" delay="1.2s" />
-          <Floating id="best-friends-club" pos="bottom-2 left-[3%] hidden w-[27%] rotate-2 sm:block" delay="2.2s" />
-          <Floating id="our-memories" pos="bottom-6 right-[3%] hidden w-[27%] -rotate-2 sm:block" delay="0.6s" />
+          <Floating id="forever-yours" pos="left-0 top-4 w-[36%] -rotate-6 sm:w-[27%]" delay="0s" />
+          <Floating id="midnight-letter" pos="right-0 top-0 w-[34%] rotate-6 sm:w-[27%]" delay="1.2s" />
+          <Floating id="best-friends-club" pos="bottom-2 left-[3%] hidden w-[27%] rotate-[4deg] sm:block" delay="2.2s" />
+          <Floating id="our-memories" pos="bottom-6 right-[3%] hidden w-[27%] -rotate-[4deg] sm:block" delay="0.6s" />
 
           <div className="absolute left-1/2 top-1/2 w-[62%] -translate-x-1/2 -translate-y-1/2 sm:w-[46%]">
             <div className="animate-floaty overflow-hidden rounded-2xl border border-[#E7E7EA] bg-white shadow-[0_40px_80px_-24px_rgba(0,0,0,0.35)]" style={{ animationDelay: "0.3s" }}>

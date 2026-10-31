@@ -13,7 +13,7 @@
     "check-env": "node scripts/check-env.mjs"
   },
   "dependencies": {
-    "@opennextjs/cloudflare": "^1.20.11",
+    "@opennextjs/cloudflare": "1.20.11",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.3",
     "@types/qrcode": "^1.5.6",

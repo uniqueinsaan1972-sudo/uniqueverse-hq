@@ -4,9 +4,9 @@ export type HomeKey = (typeof HOME_KEYS)[number];
 
 export const HOME_DEFAULTS: Record<HomeKey, string> = {
   heroTitle: "Create something they\u2019ll never forget.",
-  heroSubtitle: "Turn your memories, wishes, photos and feelings into a beautiful personal website made just for someone special.",
-  heroPrimary: "Explore Templates",
-  heroSecondary: "How It Works",
+  heroSubtitle: "Turn your photos, memories, letters, and wishes into a beautiful personalized website. Customize it, share the link, and make someone's day unforgettable.",
+  heroPrimary: "Create Your Website",
+  heroSecondary: "Explore Templates",
   heroTrust: "Personalized \u2022 Shareable \u2022 Made with memories",
   ctaTitle: "Your story. Their moment. One unforgettable experience.",
   ctaSubtitle: "Choose a template and start creating something uniquely yours.",

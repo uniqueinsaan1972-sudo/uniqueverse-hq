@@ -3,7 +3,9 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import AuthCard from "@/components/admin/AuthCard";
+import { Check } from "lucide-react";
 import { btn, input } from "@/components/admin/ui";
+import PasswordInput from "@/components/auth/PasswordInput";
 import { browserAuth } from "@/lib/supabase-browser";
 import { safeNext } from "@/lib/nav";
 
@@ -45,10 +47,15 @@ function Form() {
         <p role="status" className="text-sm text-[#3a3a3f]">Almost done. We sent a link to <strong>{email}</strong>. Open it to confirm your email, then sign in.</p>
       ) : (
         <form onSubmit={submit} className="space-y-3">
+          <ul className="mb-1 space-y-1.5 text-sm text-[#3a3a3f]">
+            {["Save your websites, links and QR codes", "Manage them from your account any time", "Publish and share when you are ready"].map((t) => (
+              <li key={t} className="flex gap-2"><Check size={16} className="mt-0.5 shrink-0" /> {t}</li>
+            ))}
+          </ul>
           <input required autoComplete="name" aria-label="Your name" placeholder="Your name" maxLength={60} className={input} value={name} onChange={(e) => setName(e.target.value)} />
           <input type="email" required autoComplete="email" aria-label="Email" placeholder="Email" className={input} value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" required autoComplete="new-password" aria-label="Password" placeholder="Password (8+ characters)" className={input} value={pw} onChange={(e) => setPw(e.target.value)} />
-          <input type="password" required autoComplete="new-password" aria-label="Repeat password" placeholder="Repeat password" className={input} value={pw2} onChange={(e) => setPw2(e.target.value)} />
+          <PasswordInput label="Password" placeholder="Password (8+ characters)" autoComplete="new-password" value={pw} onChange={setPw} />
+          <PasswordInput label="Repeat password" placeholder="Repeat password" autoComplete="new-password" value={pw2} onChange={setPw2} />
           {msg && <p role="alert" className="text-sm text-red-600">{msg}</p>}
           <button type="submit" disabled={busy} className={`${btn} w-full`}>{busy ? "Creating..." : "Create account"}</button>
           <p className="text-xs text-[#6B6B6B]">By creating an account you agree to our <Link href="/terms" className="underline">Terms</Link> and <Link href="/privacy" className="underline">Privacy Policy</Link>.</p>

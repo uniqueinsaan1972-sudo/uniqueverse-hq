@@ -1,10 +1,10 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import TemplateGrid from "@/components/TemplateGrid";
-import FeaturedTemplate from "@/components/FeaturedTemplate";
+import StepExperience from "@/components/home/StepExperience";
+import TemplateShowcase from "@/components/home/TemplateShowcase";
+import Reactions from "@/components/home/Reactions";
+import TrustStrip from "@/components/home/TrustStrip";
 import HowItWorks from "@/components/HowItWorks";
-import EmotionalSection from "@/components/EmotionalSection";
-import Showcase from "@/components/Showcase";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
 
@@ -14,11 +14,11 @@ export default function Home() {
       <Navbar />
       <main id="top">
         <Hero />
-        <TemplateGrid />
-        <FeaturedTemplate />
+        <StepExperience />
+        <TemplateShowcase />
+        <Reactions />
+        <TrustStrip />
         <HowItWorks />
-        <EmotionalSection />
-        <Showcase />
         <CTASection />
       </main>
       <Footer />
