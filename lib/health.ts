@@ -1,5 +1,6 @@
 import "server-only";
 import { adminDb } from "@/lib/supabase";
+import { publicEnv } from "@/lib/public-env";
 
 export interface HealthItem { name: string; ok: boolean; detail?: string }
 
@@ -25,9 +26,11 @@ export async function runHealth(): Promise<{ ok: boolean; items: HealthItem[] }>
   const kind = keyKind(process.env.SUPABASE_SECRET_KEY);
   add("SUPABASE_SECRET_KEY is the secret key", kind === "secret" || kind === "unknown",
     kind === "missing" ? "SUPABASE_SECRET_KEY is not set." : "This looks like the PUBLISHABLE key. Use the SECRET key from Project Settings > API Keys.");
-  const a = hostOf(process.env.SUPABASE_URL), b = hostOf(process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const pub = publicEnv();
+  const a = hostOf(process.env.SUPABASE_URL), b = hostOf(pub.url);
   add("Server and browser use the same Supabase project", Boolean(a) && a === b, `SUPABASE_URL (${a || "empty"}) and NEXT_PUBLIC_SUPABASE_URL (${b || "empty"}) must be the same project.`);
-  add("Browser key is the publishable key", keyKind(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) !== "secret", "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY must NOT be the secret key. Replace it now and rotate the secret key.");
+  add("Browser sign-in has its URL and publishable key", Boolean(pub.url && pub.key), "The browser has no publishable key. Set PUBLIC_SUPABASE_PUBLISHABLE_KEY on the worker (see SETUP.md).");
+  add("Browser key is the publishable key, not the secret key", keyKind(process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) !== "secret" && keyKind(process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY) !== "secret", "A secret key was put in a browser setting. Remove it now and create a new secret key in Supabase.");
 
   let db;
   try { db = adminDb(); } catch { add("Server can create a database connection", false, "SUPABASE_URL or SUPABASE_SECRET_KEY is missing."); return { ok: false, items }; }

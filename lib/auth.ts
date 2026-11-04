@@ -2,10 +2,11 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse, connection } from "next/server";
+import { publicEnv } from "@/lib/public-env";
 
 /** Supabase client that reads/writes the logged-in session cookie. */
 export async function authClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const { url, key } = publicEnv();
   if (!url || !key) throw new Error("Supabase auth is not configured");
   const store = await cookies();
   return createServerClient(url, key, {

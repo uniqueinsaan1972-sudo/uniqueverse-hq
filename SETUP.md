@@ -98,6 +98,19 @@ Your old websites and photos stay: they live in Supabase, which this site uses t
 - **Reset email does not arrive:** Supabase's built-in email is limited and may only send to your Supabase team members. Add your email as a team member, or set up your own SMTP later. You can always set a new password in Supabase > Authentication > Users.
 - **"Generate" fails on Cloudflare with error 1102:** the free plan's CPU limit was hit. Options: Workers Paid ($5/month), or keep using your Vercel site.
 
+
+## If sign-in says "not set up" (browser keys)
+The browser needs the Supabase URL and the **publishable** key. They can come from the build (`.env.local`) or, safer, from the worker at run time:
+1. Deploy this version: `npm run deploy`.
+2. Give the worker the key (it asks you to paste it; the text is not shown):
+```
+npx wrangler secret put PUBLIC_SUPABASE_PUBLISHABLE_KEY
+```
+   Paste the key that starts with `sb_publishable_`. (`SUPABASE_URL` is already set for the server and is reused as the URL.)
+3. Open `https://YOUR-SITE/api/build-info`. It shows only yes/no answers. You want `"browserSignInReady": true`. It also shows the build time, so you can see whether your newest deploy is the one that is live.
+4. Reload the sign-in page with `Ctrl + Shift + R` (the setting is cached for up to 5 minutes).
+A secret key put in this setting is never sent to browsers.
+
 ## 9. Not done yet (so you know)
 - Uploading a new template ZIP and creating templates from the admin panel.
 - Automatic card payments (money is checked by you by hand), your own domain and AdSense.

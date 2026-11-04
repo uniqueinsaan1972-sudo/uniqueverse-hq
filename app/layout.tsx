@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { ConfigLoader } from "@/lib/config-client";
 import Tracker from "@/components/Tracker";
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={jakarta.variable}>
       <body>
+        <Script src="/env.js" strategy="beforeInteractive" />
         <ConfigLoader />
         <Tracker />
         {children}

@@ -12,6 +12,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // shows which build is live at /api/build-info
+  env: { UV_BUILD_TIME: new Date().toISOString() },
   // Cloudflare's free plan has no image-resizing service, so images are served as they are.
   images: { unoptimized: true },
   async headers() {

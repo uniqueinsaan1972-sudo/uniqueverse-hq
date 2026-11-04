@@ -1,15 +1,18 @@
 "use client";
 import { createBrowserClient } from "@supabase/ssr";
 
+declare global { interface Window { __UV_ENV?: { url?: string; key?: string } } }
+
 /**
- * Browser sign-in client. The URL and publishable key are baked into the site while it is built.
- * If they were missing at build time we say so clearly instead of crashing.
+ * Browser sign-in client. The URL and publishable key come from the build, or, if the build did not have them,
+ * from /env.js which the server fills from its runtime settings.
  */
 export function browserAuth() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const rt = typeof window !== "undefined" ? window.__UV_ENV : undefined;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || rt?.url;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || rt?.key;
   if (!url || !key) {
-    throw new Error("Sign-in is not set up in this version of the site: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY was missing when it was built. The owner must add them to .env.local and run npm run deploy again.");
+    throw new Error("Sign-in is not set up on this site yet. The owner must add the Supabase publishable key to the site (see SETUP.md, 'If sign-in says it is not set up').");
   }
   return createBrowserClient(url, key);
 }

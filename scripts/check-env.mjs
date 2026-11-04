@@ -21,11 +21,12 @@ const warn = [];
 const isPlaceholder = (v) => !v || /your-|paste-|example|xxxx/i.test(v);
 
 const url = env.NEXT_PUBLIC_SUPABASE_URL;
-if (!url) bad.push("NEXT_PUBLIC_SUPABASE_URL is missing. Add the line to .env.local (Supabase > Project Settings > API > Project URL).");
+if (!url) warn.push("NEXT_PUBLIC_SUPABASE_URL is not in .env.local. That is OK only if the worker has SUPABASE_URL set (it is used as a fallback).");
 else if (isPlaceholder(url) || !/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(url)) bad.push(`NEXT_PUBLIC_SUPABASE_URL must look like https://abcd1234.supabase.co (it is: "${url.slice(0, 40)}").`);
 
 const key = env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-if (isPlaceholder(key)) bad.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is missing or still the placeholder. Paste the PUBLISHABLE key (starts with sb_publishable_).");
+if (!key) warn.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is not in .env.local. After deploying, set it on the worker: npx wrangler secret put PUBLIC_SUPABASE_PUBLISHABLE_KEY, then open /api/build-info and look for browserSignInReady: true.");
+else if (isPlaceholder(key)) bad.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is still the placeholder. Paste the PUBLISHABLE key (starts with sb_publishable_) or delete the line.");
 else if (key.startsWith("sb_secret_")) bad.push("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY contains the SECRET key. Stop: put the publishable key there, and create a new secret key in Supabase because this one is now exposed in your file.");
 
 if (env.SUPABASE_URL && url && env.SUPABASE_URL.replace(/\/$/, "") !== url.replace(/\/$/, "")) warn.push("SUPABASE_URL and NEXT_PUBLIC_SUPABASE_URL are different projects. They must be the same.");
